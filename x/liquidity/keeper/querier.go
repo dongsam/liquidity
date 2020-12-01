@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -13,6 +14,7 @@ import (
 // NewQuerier creates a querier for liquidity REST endpoints
 func NewQuerier(k Keeper, legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err error) {
+		fmt.Println(path, path, req)
 		switch path[0] {
 		case types.QueryLiquidityPool:
 			return queryLiquidityPool(ctx, path[1:], req, k, legacyQuerierCdc)
