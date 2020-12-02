@@ -35,7 +35,7 @@ func GetTxCmd() *cobra.Command {
 
 func NewCreateLiquidityPoolCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create-liquidity-pool [pool-type-index] [deposit-coins]",
+		Use:   "liquidity-pool [pool-type-index] [deposit-coins]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Create Liquidity pool with the specified pool-type, deposit coins",
 		Long: strings.TrimSpace(
