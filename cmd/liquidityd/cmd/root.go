@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	vestingcli "github.com/cosmos/cosmos-sdk/x/auth/vesting/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/tendermint/liquidity/app/params"
 	"io"
@@ -71,9 +72,12 @@ func Execute(rootCmd *cobra.Command) error {
 	// and a Tendermint RPC. This requires the use of a pointer reference when
 	// getting and setting the client.Context. Ideally, we utilize
 	// https://github.com/spf13/cobra/pull/1118.
+	srvCtx := server.NewDefaultContext()
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, client.ClientContextKey, &client.Context{})
-	ctx = context.WithValue(ctx, server.ServerContextKey, server.NewDefaultContext())
+	ctx = context.WithValue(ctx, server.ServerContextKey, srvCtx)
+
+	rootCmd.PersistentFlags().String("log_level", srvCtx.Config.LogLevel, "The logging level in the format of <module>:<level>,...")
 
 	executor := tmcli.PrepareBaseCmd(rootCmd, "", liquidity.DefaultNodeHome)
 	return executor.ExecuteContext(ctx)
@@ -94,8 +98,9 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 		debug.Cmd(),
 	)
 
-	server.AddCommands(rootCmd, liquidity.DefaultNodeHome, newApp, createAppAndExport, crisis.AddModuleInitFlags)
+	server.AddCommands(rootCmd, liquidity.DefaultNodeHome, newApp, createAppAndExport, addModuleInitFlags)
 
+	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
 		queryCommand(),
@@ -120,7 +125,6 @@ func queryCommand() *cobra.Command {
 		rpc.BlockCommand(),
 		authcmd.QueryTxsByEventsCmd(),
 		authcmd.QueryTxCmd(),
-		//liquiditycmd.GetQueryCmd(),
 	)
 
 	liquidity.ModuleBasics.AddQueryCommands(cmd)
@@ -148,8 +152,7 @@ func txCommand() *cobra.Command {
 		authcmd.GetEncodeCommand(),
 		authcmd.GetDecodeCommand(),
 		flags.LineBreak,
-		//vestingcli.GetTxCmd(),
-		//liquiditycmd.GetTxCmd(),
+		vestingcli.GetTxCmd(),
 	)
 
 	liquidity.ModuleBasics.AddTxCommands(cmd)
@@ -223,4 +226,7 @@ func createAppAndExport(
 	}
 
 	return app.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
+}
+func addModuleInitFlags(startCmd *cobra.Command) {
+	crisis.AddModuleInitFlags(startCmd)
 }
