@@ -20,7 +20,7 @@ func NewQuerier(k Keeper, legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 			return queryLiquidityPool(ctx, path[1:], req, k, legacyQuerierCdc)
 		default:
 			fmt.Println("querier defalt case")
-			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown query path: %s", path[0])
+			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown query path of liquidity module: %s", path[0])
 		}
 	}
 }
